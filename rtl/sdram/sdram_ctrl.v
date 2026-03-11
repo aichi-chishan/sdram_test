@@ -171,7 +171,8 @@ module sdram_ctrl(
         endcase
     end
 
-    wire base_wr_ack = ((O_sdram_work_state==`TRCD)&(~O_sdram_rd_wr)|(O_sdram_work_state==`WR)|(O_sdram_work_state==`WR_BE)&(O_cnt_clk<active_burst-2'd2));
+    // 仅在WR和WR_BE阶段，且不多读
+    wire base_wr_ack = (O_sdram_work_state==`WR) | ((O_sdram_work_state==`WR_BE) & (O_cnt_clk < active_burst - 1'b1));
     wire base_rd_ack = (O_sdram_work_state==`RD_BE)&(O_cnt_clk>=10'd1)&(O_cnt_clk<active_burst+2'd1);
 
     assign O_wr0_ack = (active_port == 3'd0) & base_wr_ack;

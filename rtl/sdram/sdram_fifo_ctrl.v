@@ -77,20 +77,25 @@ module sdram_fifo_ctrl(
     end
 
     // ====== FIFO 例化及请求逻辑 ======
-    wire [9:0] wr0_use, rd0_use, rd1_use, rd2_use, wr1_use;
-    
-    always @(posedge I_ref_clk or negedge I_rst_n) begin
-        if(!I_rst_n) begin O_sdram_wr0_req<=0; O_sdram_rd0_req<=0; O_sdram_rd1_req<=0; O_sdram_rd2_req<=0; O_sdram_wr1_req<=0; end
-        else if(I_sdram_init_done) begin
-            O_sdram_wr0_req <= (wr0_use >= I_wr0_burst);
-            O_sdram_rd0_req <= ((10'd512 - rd0_use) >= I_rd0_burst);
-            O_sdram_rd1_req <= ((10'd512 - rd1_use) >= I_rd1_burst);
-            O_sdram_rd2_req <= ((10'd512 - rd2_use) >= I_rd2_burst);
-            O_sdram_wr1_req <= (wr1_use >= I_wr1_burst);
-        end
-    end
+    wire [10:0] wr0_use, rd0_use, rd1_use, rd2_use, wr1_use;
 
-    async_fifo_32x512 fifo_wr0 (
+    always @(posedge I_ref_clk or negedge I_rst_n) begin
+    if(!I_rst_n) begin 
+        O_sdram_wr0_req<=0; O_sdram_rd0_req<=0; O_sdram_rd1_req<=0; O_sdram_rd2_req<=0; O_sdram_wr1_req<=0; 
+    end
+    else if(I_sdram_init_done) begin
+        // 写FIFO：判断FIFO内已有的数据是否足够一个Burst
+        O_sdram_wr0_req <= (wr0_use >= I_wr0_burst);
+        O_sdram_wr1_req <= (wr1_use >= I_wr1_burst);
+        
+        // 读FIFO：判断FIFO内剩余的空间是否足够容纳从SDRAM读出的一个Burst
+        O_sdram_rd0_req <= ((11'd1024 - rd0_use) >= I_rd0_burst);
+        O_sdram_rd1_req <= ((11'd1024 - rd1_use) >= I_rd1_burst);
+        O_sdram_rd2_req <= ((11'd1024 - rd2_use) >= I_rd2_burst);
+    end
+end
+
+    async_fifo_32x1024 fifo_wr0 (
         .wrclk(I_wr0_clk), 
         .rdclk(I_ref_clk), 
         .wrreq(I_wr0_req), 
@@ -100,9 +105,9 @@ module sdram_fifo_ctrl(
         .aclr(~I_rst_n|wr0_ld_p), 
         .rdusedw(wr0_use)
     );
-    async_fifo_32x512 fifo_rd0 (.wrclk(I_ref_clk), .rdclk(I_rd0_clk), .wrreq(I_sdram_rd0_ack), .rdreq(I_rd0_req), .data(I_sdram_rd0_data), .q(O_rd0_data), .aclr(~I_rst_n|rd0_ld_p), .wrusedw(rd0_use));
-    async_fifo_32x512 fifo_rd1 (.wrclk(I_ref_clk), .rdclk(I_rd1_clk), .wrreq(I_sdram_rd1_ack), .rdreq(I_rd1_req), .data(I_sdram_rd1_data), .q(O_rd1_data), .aclr(~I_rst_n|rd1_ld_p), .wrusedw(rd1_use));
-    async_fifo_32x512 fifo_rd2 (.wrclk(I_ref_clk), .rdclk(I_rd2_clk), .wrreq(I_sdram_rd2_ack), .rdreq(I_rd2_req), .data(I_sdram_rd2_data), .q(O_rd2_data), .aclr(~I_rst_n|rd2_ld_p), .wrusedw(rd2_use));
-    async_fifo_32x512 fifo_wr1 (.wrclk(I_wr1_clk), .rdclk(I_ref_clk), .wrreq(I_wr1_req), .rdreq(I_sdram_wr1_ack), .data(I_wr1_data), .q(O_sdram_wr1_data), .aclr(~I_rst_n|wr1_ld_p), .rdusedw(wr1_use));
+    async_fifo_32x1024 fifo_rd0 (.wrclk(I_ref_clk), .rdclk(I_rd0_clk), .wrreq(I_sdram_rd0_ack), .rdreq(I_rd0_req), .data(I_sdram_rd0_data), .q(O_rd0_data), .aclr(~I_rst_n|rd0_ld_p), .wrusedw(rd0_use));
+    async_fifo_32x1024 fifo_rd1 (.wrclk(I_ref_clk), .rdclk(I_rd1_clk), .wrreq(I_sdram_rd1_ack), .rdreq(I_rd1_req), .data(I_sdram_rd1_data), .q(O_rd1_data), .aclr(~I_rst_n|rd1_ld_p), .wrusedw(rd1_use));
+    async_fifo_32x1024 fifo_rd2 (.wrclk(I_ref_clk), .rdclk(I_rd2_clk), .wrreq(I_sdram_rd2_ack), .rdreq(I_rd2_req), .data(I_sdram_rd2_data), .q(O_rd2_data), .aclr(~I_rst_n|rd2_ld_p), .wrusedw(rd2_use));
+    async_fifo_32x1024 fifo_wr1 (.wrclk(I_wr1_clk), .rdclk(I_ref_clk), .wrreq(I_wr1_req), .rdreq(I_sdram_wr1_ack), .data(I_wr1_data), .q(O_sdram_wr1_data), .aclr(~I_rst_n|wr1_ld_p), .rdusedw(wr1_use));
 
 endmodule
