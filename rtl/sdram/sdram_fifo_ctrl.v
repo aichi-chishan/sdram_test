@@ -77,7 +77,12 @@ module sdram_fifo_ctrl(
     end
 
     // ====== FIFO 例化及请求逻辑 ======
-    wire [10:0] wr0_use, rd0_use, rd1_use, rd2_use, wr1_use;
+    wire [9:0] wr0_use, rd0_use, rd1_use, rd2_use, wr1_use;
+    
+    // 修改读请求判断（深度为1024时，10位宽最大值为1023）
+    O_sdram_rd0_req <= ((10'd1023 - rd0_use) >= I_rd0_burst); 
+    O_sdram_rd1_req <= ((10'd1023 - rd1_use) >= I_rd1_burst);
+    O_sdram_rd2_req <= ((10'd1023 - rd2_use) >= I_rd2_burst);
 
     always @(posedge I_ref_clk or negedge I_rst_n) begin
     if(!I_rst_n) begin 
