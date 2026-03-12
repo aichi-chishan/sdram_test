@@ -23,8 +23,16 @@ module tb_sdram_top();
         I_ref_clk = 0; I_out_clk = 0; I_rst_n = 0;
         #100 I_rst_n = 1;
     end
-    always #10 I_ref_clk = ~I_ref_clk; // 50MHz 控制器时钟
-    always #5  I_out_clk = ~I_out_clk; // 100MHz SDRAM 物理时钟
+
+    // 原有 I_ref_clk 生成保持不变
+    always #5 I_ref_clk = ~I_ref_clk;   // 100MHz 控制器时钟
+
+    // 修改 I_out_clk 生成：先延迟2ns再开始周期性翻转
+    initial begin
+        I_out_clk = 0;
+        #2;   // 滞后2ns
+        forever #5 I_out_clk = ~I_out_clk;  // 100MHz SDRAM 物理时钟
+    end
 
     // 各端口控制信号
     reg         I_wr0_clk, I_rd0_clk, I_rd1_clk, I_rd2_clk, I_wr1_clk;
