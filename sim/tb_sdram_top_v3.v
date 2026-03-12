@@ -18,9 +18,11 @@ module tb_sdram_top();
     // 信号与时钟复位
     // -------------------------------------------------------------------------
     reg I_ref_clk, I_out_clk, I_rst_n;
+    reg clk_33M, clk_24M;
 
     initial begin
         I_ref_clk = 0; I_out_clk = 0; I_rst_n = 0;
+        clk_33M = 0; clk_24M = 0;
         #100 I_rst_n = 1;
     end
 
@@ -32,6 +34,18 @@ module tb_sdram_top();
         I_out_clk = 0;
         #2;   // 滞后2ns
         forever #5 I_out_clk = ~I_out_clk;  // 100MHz SDRAM 物理时钟
+    end
+
+    // 读写时钟的生成
+    always #15   clk_33M = ~clk_33M;
+    always #20.8 clk_24M = ~clk_24M;
+
+    always @(*) begin
+        I_wr0_clk = clk_33M; 
+        I_rd0_clk = clk_24M;
+        I_rd1_clk = clk_24M; 
+        I_wr1_clk = clk_33M; 
+        I_rd2_clk = clk_24M;
     end
 
     // 各端口控制信号
@@ -50,11 +64,6 @@ module tb_sdram_top();
     wire [12:0] O_sdram_addr;
     wire [31:0] IO_sdram_dq;
     wire [3:0]  O_sdram_dqm;
-
-    always @(*) begin
-        I_wr0_clk = I_ref_clk; I_rd0_clk = I_ref_clk;
-        I_rd1_clk = I_ref_clk; I_wr1_clk = I_ref_clk; I_rd2_clk = I_ref_clk;
-    end
 
     // -------------------------------------------------------------------------
     // 实例化待测设计 (DUT)
