@@ -9,7 +9,7 @@ module sdram_top(
     input wire I_wr0_load,
     input wire [31:0] I_wr0_data, 
     input wire [23:0] I_wr0_saddr, 
-    input wire I_wr0_eaddr, 
+    input wire [23:0] I_wr0_eaddr, 
     input wire [9:0] I_wr0_burst,
 
     // RD0 (Screen)
@@ -18,7 +18,7 @@ module sdram_top(
     input wire I_rd0_load,
     output wire [31:0] O_rd0_data, 
     input wire [23:0] I_rd0_saddr, 
-    input wire I_rd0_eaddr, 
+    input wire [23:0] I_rd0_eaddr, 
     input wire [9:0] I_rd0_burst,
 
     // RD1 (Algo A)
@@ -27,7 +27,7 @@ module sdram_top(
     input wire I_rd1_load,
     output wire [31:0] O_rd1_data, 
     input wire [23:0] I_rd1_saddr, 
-    input wire I_rd1_eaddr, 
+    input wire [23:0] I_rd1_eaddr, 
     input wire [9:0] I_rd1_burst,
 
     // RD2 (Algo B)
@@ -36,7 +36,7 @@ module sdram_top(
     input wire I_rd2_load,
     output wire [31:0] O_rd2_data, 
     input wire [23:0] I_rd2_saddr, 
-    input wire I_rd2_eaddr, 
+    input wire [23:0]I_rd2_eaddr, 
     input wire [9:0] I_rd2_burst,
 
     // WR1 (Algo Write)
@@ -45,7 +45,7 @@ module sdram_top(
     input wire I_wr1_load,
     input wire [31:0] I_wr1_data, 
     input wire [23:0] I_wr1_saddr, 
-    input wire I_wr1_eaddr, 
+    input wire [23:0] I_wr1_eaddr, 
     input wire [9:0] I_wr1_burst,
 
     // SDRAM initialization complete flag
